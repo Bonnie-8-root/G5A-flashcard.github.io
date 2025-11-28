@@ -1,0 +1,2019 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grade 5 Vocabulary Flashcards - 交互式闪卡</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            color: #333;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            color: #2c3e50;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            color: #7f8c8d;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            background: linear-gradient(45deg, #3498db, #2980b9);
+            border: none;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+        }
+
+        .btn.secondary {
+            background: linear-gradient(45deg, #2ecc71, #27ae60);
+        }
+
+        .btn.tertiary {
+            background: linear-gradient(45deg, #e74c3c, #c0392b);
+        }
+
+        .unit-section {
+            margin-bottom: 40px;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 20px;
+            padding: 30px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+        }
+
+        .unit-title {
+            text-align: center;
+            font-size: 1.8rem;
+            margin-bottom: 25px;
+            color: #3498db;
+            border-bottom: 2px solid rgba(52, 152, 219, 0.3);
+            padding-bottom: 10px;
+        }
+
+        .card-container {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            perspective: 1000px;
+        }
+        
+        @media (max-width: 1200px) {
+            .card-container {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .card-container {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .card-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .flashcard {
+            height: 350px;
+            position: relative;
+            transform-style: preserve-3d;
+            perspective: 1000px;
+            transition: transform 0.6s ease;
+            cursor: pointer;
+        }
+
+        .flashcard.flipped {
+            transform: rotateY(180deg);
+        }
+
+        .card-front, .card-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            border-radius: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .card-front {
+            background: linear-gradient(135deg, #FFB347, #FF9500);
+            color: white;
+        }
+
+        .card-back {
+            background: linear-gradient(135deg, #6BCEFF, #9BDEFF);
+            color: #333333;
+            transform: rotateY(180deg);
+        }
+
+        .card-image {
+            width: 120px;
+            height: 120px;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+            font-size: 3rem;
+            border: 3px solid rgba(255, 255, 255, 0.5);
+        }
+
+        .chinese {
+            font-size: 2rem;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 10px;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+        }
+
+        .english {
+            font-size: 2.5rem;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 5px;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+        }
+        
+        .phonetic {
+            font-size: 1.2rem;
+            text-align: center;
+            margin-bottom: 10px;
+            opacity: 0.9;
+            font-style: italic;
+            color: rgba(255, 255, 255, 0.9);
+            font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'DejaVu Sans', sans-serif;
+        }
+
+        .sentence {
+            font-size: 1.1rem;
+            text-align: center;
+            line-height: 1.5;
+            background: rgba(255, 255, 255, 0.3);
+            padding: 15px;
+            border-radius: 10px;
+            border-left: 4px solid rgba(255, 255, 255, 0.7);
+        }
+
+        .hint {
+            position: absolute;
+            bottom: 15px;
+            font-size: 0.9rem;
+            opacity: 0.7;
+            text-align: center;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 3px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+
+        .progress {
+            height: 100%;
+            background: linear-gradient(90deg, #ffd700, #ff9ff3);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10px;
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+
+        @media (max-width: 768px) {
+            .card-container {
+                grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            }
+            
+            .flashcard {
+                height: 320px;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .english {
+                font-size: 2rem;
+            }
+            
+            .chinese {
+                font-size: 1.6rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .card-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .controls {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .btn {
+                width: 200px;
+            }
+        }
+
+        /* 图标样式 */
+        .icon-book::before { content: "📚"; }
+        .icon-calendar::before { content: "📅"; }
+        .icon-person::before { content: "👤"; }
+        .icon-baby::before { content: "👶"; }
+        .icon-heart::before { content: "❤️"; }
+        .icon-teacher::before { content: "👨‍🏫"; }
+        .icon-weather::before { content: "☀️"; }
+        .icon-time::before { content: "⏰"; }
+        .icon-pen::before { content: "✏️"; }
+        .icon-dog::before { content: "🐶"; }
+        .icon-face::before { content: "😊"; }
+        .icon-sky::before { content: "☁️"; }
+        .icon-angry::before { content: "😠"; }
+        .icon-lost::before { content: "🔍"; }
+        .icon-sad::before { content: "😢"; }
+        .icon-late::before { content: "⏳"; }
+        .icon-happy::before { content: "😄"; }
+        .icon-worried::before { content: "😟"; }
+        .icon-friends::before { content: "👥"; }
+        .icon-poor::before { content: "💔"; }
+        .icon-thin::before { content: "📏"; }
+        .icon-interesting::before { content: "🤔"; }
+        .icon-why::before { content: "❓"; }
+        .icon-student::before { content: "🎒"; }
+        .icon-find::before { content: "🔎"; }
+        .icon-ago::before { content: "🕐"; }
+        .icon-but::before { content: "🔄"; }
+        .icon-active::before { content: "🏃"; }
+        .icon-naughty::before { content: "😈"; }
+        .icon-smart::before { content: "🧠"; }
+        .icon-worry::before { content: "😰"; }
+        .icon-see::before { content: "👀"; }
+        .icon-yesterday::before { content: "📅"; }
+        .icon-helpful::before { content: "🤝"; }
+        .icon-party::before { content: "🎉"; }
+        .icon-when::before { content: "⏰"; }
+        .icon-present::before { content: "🎁"; }
+        .icon-open::before { content: "🚪"; }
+        .icon-wish::before { content: "✨"; }
+        .icon-song::before { content: "🎵"; }
+        .icon-camera::before { content: "📷"; }
+        .icon-children::before { content: "👧👦"; }
+        .icon-sing::before { content: "🎤"; }
+        .icon-make::before { content: "🔨"; }
+        .icon-send::before { content: "📤"; }
+        .icon-photo::before { content: "🖼️"; }
+        .icon-sit::before { content: "🪑"; }
+        .icon-group::before { content: "👥"; }
+        .icon-story::before { content: "📖"; }
+        .icon-circle::before { content: "⭕"; }
+        .icon-different::before { content: "🔄"; }
+        .icon-eat::before { content: "🍽️"; }
+        .icon-really::before { content: "❗"; }
+        .icon-reading::before { content: "📚"; }
+        .icon-french::before { content: "🇫🇷"; }
+        .icon-after::before { content: "➡️"; }
+        .icon-film::before { content: "🎬"; }
+        .icon-busy::before { content: "💼"; }
+        .icon-building::before { content: "🏢"; }
+        .icon-tree::before { content: "🌳"; }
+        .icon-gym::before { content: "🏋️"; }
+        .icon-club::before { content: "🎯"; }
+        .icon-tennis::before { content: "🏓"; }
+        .icon-join::before { content: "➕"; }
+        .icon-oops::before { content: "😅"; }
+        .icon-try::before { content: "💪"; }
+        .icon-again::before { content: "🔁"; }
+        .icon-match::before { content: "⚽"; }
+        .icon-high::before { content: "⬆️"; }
+        .icon-ball::before { content: "⚾"; }
+        .icon-basket::before { content: "🏀"; }
+        .icon-get::before { content: "📬"; }
+        .icon-shoot::before { content: "🎯"; }
+        .icon-win::before { content: "🏆"; }
+        .icon-their::before { content: "👥"; }
+        .icon-easy::before { content: "😊"; }
+        .icon-last::before { content: "🔚"; }
+        .icon-pass::before { content: "➡️"; }
+        .icon-goal::before { content: "🥅"; }
+        .icon-animal::before { content: "🐾"; }
+        .icon-spring::before { content: "🌸"; }
+        .icon-before::before { content: "⬅️"; }
+        .icon-relative::before { content: "👨‍👩‍👧‍👦"; }
+        .icon-come::before { content: "👋"; }
+        .icon-firework::before { content: "🎆"; }
+        .icon-house::before { content: "🏠"; }
+        .icon-wonderful::before { content: "🌟"; }
+        .icon-fun::before { content: "😄"; }
+        .icon-country::before { content: "🌄"; }
+        .icon-ask::before { content: "❓"; }
+        .icon-money::before { content: "🧧"; }
+        .icon-eve::before { content: "🌙"; }
+        .icon-early::before { content: "🌅"; }
+        .icon-next::before { content: "➡️"; }
+     </style>
+ </head>
+
+ <body>
+     <div class="container">
+         <div class="header">
+             <h1>G5A 单词闪卡 - 交互式学习</h1>
+             <p>正面：图片 + 中文意思 | 反面：英文单词 + 例句</p>
+         </div>
+
+         <div class="controls">
+             <button class="btn" onclick="flipAllCards()">全部翻转</button>
+             <button class="btn secondary" onclick="resetAllCards()">全部重置</button>
+             <button class="btn secondary" onclick="shuffleCards()">随机排序</button>
+             <button class="btn tertiary" onclick="toggleTTS()" id="ttsToggle">🔇 TTS关闭</button>
+         </div>
+
+         <div class="progress-bar">
+             <div class="progress" id="progress"></div>
+         </div>
+         <div class="stats">
+             <span id="currentCard">0</span> / <span id="totalCards">0</span>
+             <span id="flippedCount">已翻转: 0</span>
+         </div>
+
+    <div class="unit-section">
+         <h2 class="unit-title">Unit 1</h2>
+         <div class="card-container">
+             <div class="flashcard" onclick="flipCard(this)">
+                 <div class="card-front">
+                     <div class="card-image icon-book"></div>
+                     <div class="chinese">卡片, 贺卡</div>
+                     <div class="hint">点击卡片查看英文</div>
+                 </div>
+                 <div class="card-back">
+                     <div class="english">card</div>
+                     <div class="phonetic">/kɑːrd/</div>
+                     <div class="sentence">I made a birthday card for my mother.</div>
+                     <div class="hint">点击返回中文</div>
+                 </div>
+             </div>
+             <div class="flashcard" onclick="flipCard(this)">
+                 <div class="card-front">
+                     <div class="card-image icon-calendar"></div>
+                     <div class="chinese">九月</div>
+                     <div class="hint">点击卡片查看英文</div>
+                 </div>
+                 <div class="card-back">
+                     <div class="english">September</div>
+                     <div class="phonetic">/sepˈtembər/</div>
+                     <div class="sentence">The school year starts in September.</div>
+                     <div class="hint">点击返回中文</div>
+                 </div>
+             </div>
+             <div class="flashcard" onclick="flipCard(this)">
+                 <div class="card-front">
+                     <div class="card-image icon-person"></div>
+                     <div class="chinese">谁</div>
+                     <div class="hint">点击卡片查看英文</div>
+                 </div>
+                 <div class="card-back">
+                     <div class="english">who</div>
+                     <div class="phonetic">/huː/</div>
+                     <div class="sentence">Who is your best friend?</div>
+                     <div class="hint">点击返回中文</div>
+                 </div>
+             </div>
+             <div class="flashcard" onclick="flipCard(this)">
+                 <div class="card-front">
+                     <div class="card-image icon-baby"></div>
+                     <div class="chinese">年轻的</div>
+                     <div class="hint">点击卡片查看英文</div>
+                 </div>
+                 <div class="card-back">
+                     <div class="english">young</div>
+                     <div class="phonetic">/jʌŋ/</div>
+                     <div class="sentence">The young boy likes to play ball.</div>
+                     <div class="hint">点击返回中文</div>
+                 </div>
+             </div>
+             <div class="flashcard" onclick="flipCard(this)">
+                 <div class="card-front">
+                     <div class="card-image icon-heart"></div>
+                     <div class="chinese">亲切的; 和蔼的</div>
+                     <div class="hint">点击卡片查看英文</div>
+                 </div>
+                 <div class="card-back">
+                     <div class="english">kind</div>
+                     <div class="phonetic">/kaɪnd/</div>
+                     <div class="sentence">My grandmother is very kind to me.</div>
+                     <div class="hint">点击返回中文</div>
+                 </div>
+             </div>
+             <div class="flashcard" onclick="flipCard(this)">
+                 <div class="card-front">
+                     <div class="card-image icon-teacher"></div>
+                     <div class="chinese">严格的; 严厉的</div>
+                     <div class="hint">点击卡片查看英文</div>
+                 </div>
+                 <div class="card-back">
+                     <div class="english">strict</div>
+                     <div class="phonetic">/strɪkt/</div>
+                     <div class="sentence">Our math teacher is strict about homework.</div>
+                     <div class="hint">点击返回中文</div>
+                 </div>
+             </div>
+             <div class="flashcard" onclick="flipCard(this)">
+                 <div class="card-front">
+                     <div class="card-image icon-weather"></div>
+                     <div class="chinese">was (is 的过去式) 是</div>
+                     <div class="hint">点击卡片查看英文</div>
+                 </div>
+                 <div class="card-back">
+                     <div class="english">was</div>
+                     <div class="phonetic">/wʌz/</div>
+                     <div class="sentence">It was sunny yesterday.</div>
+                     <div class="hint">点击返回中文</div>
+                 </div>
+             </div>
+             <div class="flashcard" onclick="flipCard(this)">
+                 <div class="card-front">
+                     <div class="card-image icon-time"></div>
+                     <div class="chinese">当时, 那时</div>
+                     <div class="hint">点击卡片查看英文</div>
+                 </div>
+                 <div class="card-back">
+                     <div class="english">then</div>
+                     <div class="phonetic">/ðen/</div>
+                     <div class="sentence">I lived in a small house then.</div>
+                     <div class="hint">点击返回中文</div>
+                 </div>
+             </div>
+             <div class="flashcard" onclick="flipCard(this)">
+                 <div class="card-front">
+                     <div class="card-image icon-pen"></div>
+                     <div class="chinese">他的</div>
+                     <div class="hint">点击卡片查看英文</div>
+                 </div>
+                 <div class="card-back">
+                     <div class="english">his</div>
+                     <div class="phonetic">/hɪz/</div>
+                     <div class="sentence">This is his blue pen.</div>
+                     <div class="hint">点击返回中文</div>
+                 </div>
+             </div>
+             <div class="flashcard" onclick="flipCard(this)">
+                 <div class="card-front">
+                     <div class="card-image icon-dog"></div>
+                     <div class="chinese">小的</div>
+                     <div class="hint">点击卡片查看英文</div>
+                 </div>
+                 <div class="card-back">
+                     <div class="english">little</div>
+                     <div class="phonetic">/ˈlɪtl/</div>
+                     <div class="sentence">Look at the cute little dog.</div>
+                     <div class="hint">点击返回中文</div>
+                 </div>
+             </div>
+         </div>
+     </div>
+
+     <div class="unit-section">
+         <h2 class="unit-title">Unit 2</h2>
+         <div class="card-container">
+             <div class="flashcard" onclick="flipCard(this)">
+                 <div class="card-front">
+                     <div class="card-image icon-eye"></div>
+                     <div class="chinese">看起来, 看上去</div>
+                     <div class="hint">点击卡片查看英文</div>
+                 </div>
+                 <div class="card-back">
+                     <div class="english">look</div>
+                     <div class="phonetic">/lʊk/</div>
+                     <div class="sentence">You look very happy today.</div>
+                     <div class="hint">点击返回中文</div>
+                 </div>
+             </div>
+             <div class="flashcard" onclick="flipCard(this)">
+                 <div class="card-front">
+                     <div class="card-image icon-excited"></div>
+                     <div class="chinese">激动的, 兴奋的</div>
+                     <div class="hint">点击卡片查看英文</div>
+                 </div>
+                 <div class="card-back">
+                     <div class="english">excited</div>
+                     <div class="phonetic">/ɪkˈsaɪtɪd/</div>
+                     <div class="sentence">I am excited about the school trip.</div>
+                     <div class="hint">点击返回中文</div>
+                 </div>
+             </div>
+             <div class="flashcard" onclick="flipCard(this)">
+                 <div class="card-front">
+                     <div class="card-image icon-sky"></div>
+                     <div class="chinese">天空</div>
+                     <div class="hint">点击卡片查看英文</div>
+                 </div>
+                 <div class="card-back">
+                     <div class="english">sky</div>
+                     <div class="phonetic">/skaɪ/</div>
+                     <div class="sentence">The bird is flying in the blue sky.</div>
+                     <div class="hint">点击返回中文</div>
+                 </div>
+             </div>
+             <div class="flashcard" onclick="flipCard(this)">
+                 <div class="card-front">
+                     <div class="card-image icon-angry"></div>
+                     <div class="chinese">生气的</div>
+                     <div class="hint">点击卡片查看英文</div>
+                 </div>
+                 <div class="card-back">
+                     <div class="english">angry</div>
+                     <div class="phonetic">/ˈæŋɡri/</div>
+                     <div class="sentence">He was angry because his bike broke.</div>
+                     <div class="hint">点击返回中文</div>
+                 </div>
+             </div>
+             <div class="flashcard" onclick="flipCard(this)">
+                 <div class="card-front">
+                     <div class="card-image icon-lost"></div>
+                     <div class="chinese">lost (lose 的过去式) 丢失</div>
+                     <div class="hint">点击卡片查看英文</div>
+                 </div>
+                 <div class="card-back">
+                     <div class="english">lost</div>
+                     <div class="phonetic">/lɒst/</div>
+                     <div class="sentence">I lost my keys yesterday.</div>
+                     <div class="hint">点击返回中文</div>
+                 </div>
+             </div>
+             <div class="flashcard" onclick="flipCard(this)">
+                 <div class="card-front">
+                     <div class="card-image icon-sad"></div>
+                     <div class="chinese">难过的, 伤心的</div>
+                     <div class="hint">点击卡片查看英文</div>
+                 </div>
+                 <div class="card-back">
+                     <div class="english">sad</div>
+                     <div class="phonetic">/sæd/</div>
+                     <div class="sentence">She is sad because she lost her book.</div>
+                     <div class="hint">点击返回中文</div>
+                 </div>
+             </div>
+             <div class="flashcard" onclick="flipCard(this)">
+                 <div class="card-front">
+                     <div class="card-image icon-clock"></div>
+                     <div class="chinese">迟的, 晚的</div>
+                     <div class="hint">点击卡片查看英文</div>
+                 </div>
+                 <div class="card-back">
+                     <div class="english">late</div>
+                     <div class="phonetic">/leɪt/</div>
+                     <div class="sentence">Don't be late for class.</div>
+                     <div class="hint">点击返回中文</div>
+                 </div>
+             </div>
+             <div class="flashcard" onclick="flipCard(this)">
+                 <div class="card-front">
+                     <div class="card-image icon-happy"></div>
+                     <div class="chinese">高兴的</div>
+                     <div class="hint">点击卡片查看英文</div>
+                 </div>
+                 <div class="card-back">
+                     <div class="english">glad</div>
+                     <div class="phonetic">/ɡlæd/</div>
+                     <div class="sentence">I am glad to see you again.</div>
+                     <div class="hint">点击返回中文</div>
+                 </div>
+             </div>
+             <div class="flashcard" onclick="flipCard(this)">
+                 <div class="card-front">
+                     <div class="card-image icon-worried"></div>
+                     <div class="chinese">担心的</div>
+                     <div class="hint">点击卡片查看英文</div>
+                 </div>
+                 <div class="card-back">
+                     <div class="english">worried</div>
+                     <div class="phonetic">/ˈwʌrid/</div>
+                     <div class="sentence">Mom is worried when I come home late.</div>
+                     <div class="hint">点击返回中文</div>
+                 </div>
+             </div>
+             <div class="flashcard" onclick="flipCard(this)">
+                 <div class="card-front">
+                     <div class="card-image icon-friends"></div>
+                     <div class="chinese">和 ... 在一起</div>
+                     <div class="hint">点击卡片查看英文</div>
+                 </div>
+                 <div class="card-back">
+                     <div class="english">with</div>
+                     <div class="phonetic">/wɪð/</div>
+                     <div class="sentence">I like to play with my friends.</div>
+                     <div class="hint">点击返回中文</div>
+                 </div>
+             </div>
+             <div class="flashcard" onclick="flipCard(this)">
+                 <div class="card-front">
+                     <div class="card-image icon-not"></div>
+                     <div class="chinese">wasn't (was not) 不是</div>
+                     <div class="hint">点击卡片查看英文</div>
+                 </div>
+                 <div class="card-back">
+                     <div class="english">wasn't</div>
+                     <div class="phonetic">/ˈwɒznt/</div>
+                     <div class="sentence">He wasn't at school on Monday.</div>
+                     <div class="hint">点击返回中文</div>
+                 </div>
+             </div>
+             <div class="flashcard" onclick="flipCard(this)">
+                 <div class="card-front">
+                     <div class="card-image icon-cat"></div>
+                     <div class="chinese">可怜的</div>
+                     <div class="hint">点击卡片查看英文</div>
+                 </div>
+                 <div class="card-back">
+                     <div class="english">poor</div>
+                     <div class="phonetic">/pʊə(r)/</div>
+                     <div class="sentence">The poor cat is hungry and cold.</div>
+                     <div class="hint">点击返回中文</div>
+                 </div>
+             </div>
+             <div class="flashcard" onclick="flipCard(this)">
+                 <div class="card-front">
+                     <div class="card-image icon-monkey"></div>
+                     <div class="chinese">瘦的</div>
+                     <div class="hint">点击卡片查看英文</div>
+                 </div>
+                 <div class="card-back">
+                     <div class="english">thin</div>
+                     <div class="phonetic">/θɪn/</div>
+                     <div class="sentence">The monkey is very thin.</div>
+                     <div class="hint">点击返回中文</div>
+                 </div>
+             </div>
+             <div class="flashcard" onclick="flipCard(this)">
+                 <div class="card-front">
+                     <div class="card-image icon-book2"></div>
+                     <div class="chinese">有趣的</div>
+                     <div class="hint">点击卡片查看英文</div>
+                 </div>
+                 <div class="card-back">
+                     <div class="english">interesting</div>
+                     <div class="phonetic">/ˈɪntrəstɪŋ/</div>
+                     <div class="sentence">This storybook is very interesting.</div>
+                     <div class="hint">点击返回中文</div>
+                 </div>
+             </div>
+             <div class="flashcard" onclick="flipCard(this)">
+                 <div class="card-front">
+                     <div class="card-image icon-park"></div>
+                     <div class="chinese">were (are 的过去式) 是</div>
+                     <div class="hint">点击卡片查看英文</div>
+                 </div>
+                 <div class="card-back">
+                     <div class="english">were</div>
+                     <div class="phonetic">/wɜː(r)/</div>
+                     <div class="sentence">They were at the park yesterday.</div>
+                     <div class="hint">点击返回中文</div>
+                 </div>
+             </div>
+             <div class="flashcard" onclick="flipCard(this)">
+                 <div class="card-front">
+                     <div class="card-image icon-question2"></div>
+                     <div class="chinese">为什么</div>
+                     <div class="hint">点击卡片查看英文</div>
+                 </div>
+                 <div class="card-back">
+                     <div class="english">why</div>
+                     <div class="phonetic">/waɪ/</div>
+                     <div class="sentence">Why are you laughing?</div>
+                     <div class="hint">点击返回中文</div>
+                 </div>
+             </div>
+             <div class="flashcard" onclick="flipCard(this)">
+                 <div class="card-front">
+                     <div class="card-image icon-student"></div>
+                     <div class="chinese">学生</div>
+                     <div class="hint">点击卡片查看英文</div>
+                 </div>
+                 <div class="card-back">
+                     <div class="english">pupil</div>
+                     <div class="phonetic">/ˈpjuːpl/</div>
+                     <div class="sentence">She is a new pupil in our class.</div>
+                     <div class="hint">点击返回中文</div>
+                 </div>
+             </div>
+             <div class="flashcard" onclick="flipCard(this)">
+                 <div class="card-front">
+                     <div class="card-image icon-search"></div>
+                     <div class="chinese">找到</div>
+                     <div class="hint">点击卡片查看英文</div>
+                 </div>
+                 <div class="card-back">
+                     <div class="english">find</div>
+                     <div class="phonetic">/faɪnd/</div>
+                     <div class="sentence">Can you help me find my bag?</div>
+                     <div class="hint">点击返回中文</div>
+                 </div>
+             </div>
+             <div class="flashcard" onclick="flipCard(this)">
+                 <div class="card-front">
+                     <div class="card-image icon-time2"></div>
+                     <div class="chinese">以前</div>
+                     <div class="hint">点击卡片查看英文</div>
+                 </div>
+                 <div class="card-back">
+                     <div class="english">ago</div>
+                     <div class="phonetic">/əˈɡəʊ/</div>
+                     <div class="sentence">He arrived ten minutes ago.</div>
+                     <div class="hint">点击返回中文</div>
+                 </div>
+             </div>
+             <div class="flashcard" onclick="flipCard(this)">
+                 <div class="card-front">
+                     <div class="card-image icon-but"></div>
+                     <div class="chinese">但是</div>
+                     <div class="hint">点击卡片查看英文</div>
+                 </div>
+                 <div class="card-back">
+                     <div class="english">but</div>
+                     <div class="phonetic">/bʌt/</div>
+                     <div class="sentence">I like apples, but I don't like bananas.</div>
+                     <div class="hint">点击返回中文</div>
+                 </div>
+             </div>
+             <div class="flashcard" onclick="flipCard(this)">
+                 <div class="card-front">
+                     <div class="card-image icon-sports"></div>
+                     <div class="chinese">活跃的; 积极的</div>
+                     <div class="hint">点击卡片查看英文</div>
+                 </div>
+                 <div class="card-back">
+                     <div class="english">active</div>
+                     <div class="phonetic">/ˈæktɪv/</div>
+                     <div class="sentence">Tom is very active in sports.</div>
+                     <div class="hint">点击返回中文</div>
+                 </div>
+             </div>
+             <div class="flashcard" onclick="flipCard(this)">
+                 <div class="card-front">
+                     <div class="card-image icon-naughty"></div>
+                     <div class="chinese">淘气的, 顽皮的</div>
+                     <div class="hint">点击卡片查看英文</div>
+                 </div>
+                 <div class="card-back">
+                     <div class="english">naughty</div>
+                     <div class="phonetic">/ˈnɔːti/</div>
+                     <div class="sentence">The naughty boy hid my shoes.</div>
+                     <div class="hint">点击返回中文</div>
+                 </div>
+             </div>
+             <div class="flashcard" onclick="flipCard(this)">
+                 <div class="card-front">
+                     <div class="card-image icon-brain"></div>
+                     <div class="chinese">聪明的</div>
+                     <div class="hint">点击卡片查看英文</div>
+                 </div>
+                 <div class="card-back">
+                     <div class="english">smart</div>
+                     <div class="phonetic">/smɑːt/</div>
+                     <div class="sentence">She is a smart student who gets good grades.</div>
+                     <div class="hint">点击返回中文</div>
+                 </div>
+             </div>
+             <div class="flashcard" onclick="flipCard(this)">
+                 <div class="card-front">
+                     <div class="card-image icon-worry"></div>
+                     <div class="chinese">担心</div>
+                     <div class="hint">点击卡片查看英文</div>
+                 </div>
+                 <div class="card-back">
+                     <div class="english">worry</div>
+                     <div class="phonetic">/ˈwʌri/</div>
+                     <div class="sentence">Don't worry about the test.</div>
+                     <div class="hint">点击返回中文</div>
+                 </div>
+             </div>
+             <div class="flashcard" onclick="flipCard(this)">
+                 <div class="card-front">
+                     <div class="card-image icon-eye2"></div>
+                     <div class="chinese">saw (see 的过去式) 看见</div>
+                     <div class="hint">点击卡片查看英文</div>
+                 </div>
+                 <div class="card-back">
+                     <div class="english">saw</div>
+                     <div class="phonetic">/sɔː/</div>
+                     <div class="sentence">I saw a beautiful bird in the tree.</div>
+                     <div class="hint">点击返回中文</div>
+                 </div>
+             </div>
+             <div class="flashcard" onclick="flipCard(this)">
+                 <div class="card-front">
+                     <div class="card-image icon-calendar2"></div>
+                     <div class="chinese">昨天</div>
+                     <div class="hint">点击卡片查看英文</div>
+                 </div>
+                 <div class="card-back">
+                     <div class="english">yesterday</div>
+                     <div class="phonetic">/ˈjestədeɪ/</div>
+                     <div class="sentence">It rained heavily yesterday.</div>
+                     <div class="hint">点击返回中文</div>
+                 </div>
+             </div>
+             <div class="flashcard" onclick="flipCard(this)">
+                 <div class="card-front">
+                     <div class="card-image icon-help"></div>
+                     <div class="chinese">有帮助的</div>
+                     <div class="hint">点击卡片查看英文</div>
+                 </div>
+                 <div class="card-back">
+                     <div class="english">helpful</div>
+                     <div class="phonetic">/ˈhelpfl/</div>
+                     <div class="sentence">He is very helpful at home.</div>
+                     <div class="hint">点击返回中文</div>
+                 </div>
+             </div>
+         </div>
+     </div>
+
+    <div class="unit-section">
+        <h2 class="unit-title">Unit 3</h2>
+        <div class="card-container">
+            <div class="flashcard" onclick="flipCard(this)">
+                <div class="card-front">
+                    <div class="card-image icon-party"></div>
+                    <div class="chinese">聚会</div>
+                    <div class="hint">点击卡片查看英文</div>
+                </div>
+                <div class="card-back">
+                    <div class="english">party</div>
+                    <div class="phonetic">/ˈpɑːti/</div>
+                    <div class="sentence">We had a fun birthday party.</div>
+                    <div class="hint">点击返回中文</div>
+                </div>
+            </div>
+            <div class="flashcard" onclick="flipCard(this)">
+                <div class="card-front">
+                    <div class="card-image icon-question3"></div>
+                    <div class="chinese">什么时候</div>
+                    <div class="hint">点击卡片查看英文</div>
+                </div>
+                <div class="card-back">
+                    <div class="english">when</div>
+                    <div class="phonetic">/wen/</div>
+                    <div class="sentence">When does the movie start?</div>
+                    <div class="hint">点击返回中文</div>
+                </div>
+            </div>
+            <div class="flashcard" onclick="flipCard(this)">
+                <div class="card-front">
+                    <div class="card-image icon-march"></div>
+                    <div class="chinese">三月</div>
+                    <div class="hint">点击卡片查看英文</div>
+                </div>
+                <div class="card-back">
+                    <div class="english">March</div>
+                    <div class="phonetic">/mɑːtʃ/</div>
+                    <div class="sentence">Spring begins in March.</div>
+                    <div class="hint">点击返回中文</div>
+                </div>
+            </div>
+            <div class="flashcard" onclick="flipCard(this)">
+                <div class="card-front">
+                    <div class="card-image icon-may"></div>
+                    <div class="chinese">五月</div>
+                    <div class="hint">点击卡片查看英文</div>
+                </div>
+                <div class="card-back">
+                    <div class="english">May</div>
+                    <div class="phonetic">/meɪ/</div>
+                    <div class="sentence">The weather is warm in May.</div>
+                    <div class="hint">点击返回中文</div>
+                </div>
+            </div>
+            <div class="flashcard" onclick="flipCard(this)">
+                <div class="card-front">
+                    <div class="card-image icon-april"></div>
+                    <div class="chinese">四月</div>
+                    <div class="hint">点击卡片查看英文</div>
+                </div>
+                <div class="card-back">
+                    <div class="english">April</div>
+                    <div class="phonetic">/ˈeɪprəl/</div>
+                    <div class="sentence">It often rains in April.</div>
+                    <div class="hint">点击返回中文</div>
+                </div>
+            </div>
+            <div class="flashcard" onclick="flipCard(this)">
+                <div class="card-front">
+                    <div class="card-image icon-october"></div>
+                    <div class="chinese">十月</div>
+                    <div class="hint">点击卡片查看英文</div>
+                </div>
+                <div class="card-back">
+                    <div class="english">October</div>
+                    <div class="phonetic">/ɒkˈtəʊbə(r)/</div>
+                    <div class="sentence">Halloween is in October.</div>
+                    <div class="hint">点击返回中文</div>
+                </div>
+            </div>
+            <div class="flashcard" onclick="flipCard(this)">
+                <div class="card-front">
+                    <div class="card-image icon-gift"></div>
+                    <div class="chinese">礼物</div>
+                    <div class="hint">点击卡片查看英文</div>
+                </div>
+                <div class="card-back">
+                    <div class="english">present</div>
+                    <div class="phonetic">/ˈpreznt/</div>
+                    <div class="sentence">I received a nice present from my dad.</div>
+                    <div class="hint">点击返回中文</div>
+                </div>
+            </div>
+            <div class="flashcard" onclick="flipCard(this)">
+                <div class="card-front">
+                    <div class="card-image icon-window"></div>
+                    <div class="chinese">打开</div>
+                    <div class="hint">点击卡片查看英文</div>
+                </div>
+                <div class="card-back">
+                    <div class="english">open</div>
+                    <div class="phonetic">/ˈəʊpən/</div>
+                    <div class="sentence">Please open the window.</div>
+                    <div class="hint">点击返回中文</div>
+                </div>
+            </div>
+            <div class="flashcard" onclick="flipCard(this)">
+                <div class="card-front">
+                    <div class="card-image icon-wish2"></div>
+                    <div class="chinese">愿望</div>
+                    <div class="hint">点击卡片查看英文</div>
+                </div>
+                <div class="card-back">
+                    <div class="english">wish</div>
+                    <div class="phonetic">/wɪʃ/</div>
+                    <div class="sentence">Make a wish before you blow out the candles.</div>
+                    <div class="hint">点击返回中文</div>
+                </div>
+            </div>
+            <div class="flashcard" onclick="flipCard(this)">
+                <div class="card-front">
+                    <div class="card-image icon-music"></div>
+                    <div class="chinese">歌曲</div>
+                    <div class="hint">点击卡片查看英文</div>
+                </div>
+                <div class="card-back">
+                    <div class="english">song</div>
+                    <div class="phonetic">/sɒŋ/</div>
+                    <div class="sentence">Let's sing a happy song.</div>
+                    <div class="hint">点击返回中文</div>
+                </div>
+            </div>
+            <div class="flashcard" onclick="flipCard(this)">
+                <div class="card-front">
+                    <div class="card-image icon-camera"></div>
+                    <div class="chinese">笑一笑 (常在拍照时说)</div>
+                    <div class="hint">点击卡片查看英文</div>
+                </div>
+                <div class="card-back">
+                    <div class="english">say cheese</div>
+                    <div class="phonetic">/seɪ tʃiːz/</div>
+                    <div class="sentence">Look at the camera and say cheese!</div>
+                    <div class="hint">点击返回中文</div>
+                </div>
+            </div>
+            <div class="flashcard" onclick="flipCard(this)">
+                <div class="card-front">
+                    <div class="card-image icon-have"></div>
+                    <div class="chinese">had (have 的过去式) 有</div>
+                    <div class="hint">点击卡片查看英文</div>
+                </div>
+                <div class="card-back">
+                    <div class="english">had</div>
+                    <div class="phonetic">/hæd/</div>
+                    <div class="sentence">I had a cold last week.</div>
+                    <div class="hint">点击返回中文</div>
+                </div>
+            </div>
+            <div class="flashcard" onclick="flipCard(this)">
+                <div class="card-front">
+                    <div class="card-image icon-children"></div>
+                    <div class="chinese">孩子们</div>
+                    <div class="hint">点击卡片查看英文</div>
+                </div>
+                <div class="card-back">
+                    <div class="english">children</div>
+                    <div class="phonetic">/ˈtʃɪldrən/</div>
+                    <div class="sentence">The children are playing in the park.</div>
+                    <div class="hint">点击返回中文</div>
+                </div>
+            </div>
+            <div class="flashcard" onclick="flipCard(this)">
+                <div class="card-front">
+                    <div class="card-image icon-sing"></div>
+                    <div class="chinese">sang (sing 的过去式) 唱</div>
+                    <div class="hint">点击卡片查看英文</div>
+                </div>
+                <div class="card-back">
+                    <div class="english">sang</div>
+                    <div class="phonetic">/sæŋ/</div>
+                    <div class="sentence">She sang a beautiful song for us.</div>
+                    <div class="hint">点击返回中文</div>
+                </div>
+            </div>
+            <div class="flashcard" onclick="flipCard(this)">
+                <div class="card-front">
+                    <div class="card-image icon-cake"></div>
+                    <div class="chinese">made (make 的过去式) 制造</div>
+                    <div class="hint">点击卡片查看英文</div>
+                </div>
+                <div class="card-back">
+                    <div class="english">made</div>
+                    <div class="phonetic">/meɪd/</div>
+                    <div class="sentence">My mom made a cake for dinner.</div>
+                    <div class="hint">点击返回中文</div>
+                </div>
+            </div>
+            <div class="flashcard" onclick="flipCard(this)">
+                <div class="card-front">
+                    <div class="card-image icon-wish3"></div>
+                    <div class="chinese">许愿</div>
+                    <div class="hint">点击卡片查看英文</div>
+                </div>
+                <div class="card-back">
+                    <div class="english">make a wish</div>
+                    <div class="phonetic">/meɪk ə wɪʃ/</div>
+                    <div class="sentence">Close your eyes and make a wish.</div>
+                    <div class="hint">点击返回中文</div>
+                </div>
+            </div>
+            <div class="flashcard" onclick="flipCard(this)">
+                <div class="card-front">
+                    <div class="card-image icon-send"></div>
+                    <div class="chinese">发送; 寄</div>
+                    <div class="hint">点击卡片查看英文</div>
+                </div>
+                <div class="card-back">
+                    <div class="english">send</div>
+                    <div class="phonetic">/send/</div>
+                    <div class="sentence">I will send a postcard to my friend.</div>
+                    <div class="hint">点击返回中文</div>
+                </div>
+            </div>
+            <div class="flashcard" onclick="flipCard(this)">
+                <div class="card-front">
+                    <div class="card-image icon-photo"></div>
+                    <div class="chinese">照片</div>
+                    <div class="hint">点击卡片查看英文</div>
+                </div>
+                <div class="card-back">
+                    <div class="english">photo</div>
+                    <div class="phonetic">/ˈfəʊtəʊ/</div>
+                    <div class="sentence">This is a photo of my family.</div>
+                    <div class="hint">点击返回中文</div>
+                </div>
+            </div>
+            <div class="flashcard" onclick="flipCard(this)">
+                <div class="card-front">
+                    <div class="card-image icon-chair"></div>
+                    <div class="chinese">坐</div>
+                    <div class="hint">点击卡片查看英文</div>
+                </div>
+                <div class="card-back">
+                    <div class="english">sit</div>
+                    <div class="phonetic">/sɪt/</div>
+                    <div class="sentence">Please sit down on the chair.</div>
+                    <div class="hint">点击返回中文</div>
+                </div>
+            </div>
+            <div class="flashcard" onclick="flipCard(this)">
+                <div class="card-front">
+                    <div class="card-image icon-group"></div>
+                    <div class="chinese">组</div>
+                    <div class="hint">点击卡片查看英文</div>
+                </div>
+                <div class="card-back">
+                    <div class="english">group</div>
+                    <div class="phonetic">/ɡruːp/</div>
+                    <div class="sentence">Work in a small group for this project.</div>
+                    <div class="hint">点击返回中文</div>
+                </div>
+            </div>
+            <div class="flashcard" onclick="flipCard(this)">
+                <div class="card-front">
+                    <div class="card-image icon-speak"></div>
+                    <div class="chinese">讲; 告诉</div>
+                    <div class="hint">点击卡片查看英文</div>
+                </div>
+                <div class="card-back">
+                    <div class="english">tell</div>
+                    <div class="phonetic">/tel/</div>
+                    <div class="sentence">Please tell me your name.</div>
+                    <div class="hint">点击返回中文</div>
+                </div>
+            </div>
+            <div class="flashcard" onclick="flipCard(this)">
+                <div class="card-front">
+                    <div class="card-image icon-book3"></div>
+                    <div class="chinese">故事</div>
+                    <div class="hint">点击卡片查看英文</div>
+                </div>
+                <div class="card-back">
+                    <div class="english">story</div>
+                    <div class="phonetic">/ˈstɔːri/</div>
+                    <div class="sentence">My dad read me a bedtime story.</div>
+                    <div class="hint">点击返回中文</div>
+                </div>
+            </div>
+            <div class="flashcard" onclick="flipCard(this)">
+                <div class="card-front">
+                    <div class="card-image icon-story"></div>
+                    <div class="chinese">讲故事</div>
+                    <div class="hint">点击卡片查看英文</div>
+                </div>
+                <div class="card-back">
+                    <div class="english">tell stories</div>
+                    <div class="phonetic">/tel ˈstɔːriz/</div>
+                    <div class="sentence">Grandma likes to tell stories about the past.</div>
+                    <div class="hint">点击返回中文</div>
+                </div>
+            </div>
+            <div class="flashcard" onclick="flipCard(this)">
+                <div class="card-front">
+                    <div class="card-image icon-circle"></div>
+                    <div class="chinese">圆, 圈</div>
+                    <div class="hint">点击卡片查看英文</div>
+                </div>
+                <div class="card-back">
+                    <div class="english">circle</div>
+                    <div class="phonetic">/ˈsɜːkl/</div>
+                    <div class="sentence">Draw a circle on the paper.</div>
+                    <div class="hint">点击返回中文</div>
+                </div>
+            </div>
+            <div class="flashcard" onclick="flipCard(this)">
+                <div class="card-front">
+                    <div class="card-image icon-different"></div>
+                    <div class="chinese">不同的</div>
+                    <div class="hint">点击卡片查看英文</div>
+                </div>
+                <div class="card-back">
+                    <div class="english">different</div>
+                    <div class="phonetic">/ˈdɪfrənt/</div>
+                    <div class="sentence">The two apples look different.</div>
+                    <div class="hint">点击返回中文</div>
+                </div>
+            </div>
+            <div class="flashcard" onclick="flipCard(this)">
+                <div class="card-front">
+                    <div class="card-image icon-do"></div>
+                    <div class="chinese">did (do 的过去式)</div>
+                    <div class="hint">点击卡片查看英文</div>
+                </div>
+                <div class="card-back">
+                    <div class="english">did</div>
+                    <div class="phonetic">/dɪd/</div>
+                    <div class="sentence">I did my homework yesterday.</div>
+                    <div class="hint">点击返回中文</div>
+                </div>
+            </div>
+            <div class="flashcard" onclick="flipCard(this)">
+                <div class="card-front">
+                    <div class="card-image icon-pizza"></div>
+                    <div class="chinese">ate (eat 的过去式) 吃</div>
+                    <div class="hint">点击卡片查看英文</div>
+                </div>
+                <div class="card-back">
+                    <div class="english">ate</div>
+                    <div class="phonetic">/eɪt/</div>
+                    <div class="sentence">We ate pizza for lunch.</div>
+                    <div class="hint">点击返回中文</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <h2 class="unit-title">Unit 4</h2>
+    <div class="unit-section">
+        <div class="card-container">
+            <div class="flashcard" onclick="flipCard(this)">
+            <div class="card-front">
+                <div class="card-image icon-true"></div>
+                <div class="chinese">真的, 是吗</div>
+                <div class="hint">点击卡片查看英文</div>
+            </div>
+            <div class="card-back">
+                <div class="english">really</div>
+                <div class="phonetic">/ˈrɪəli/</div>
+                <div class="sentence">Is that really true?</div>
+                <div class="hint">点击返回中文</div>
+            </div>
+        </div>
+        <div class="flashcard" onclick="flipCard(this)">
+            <div class="card-front">
+                <div class="card-image icon-book2"></div>
+                <div class="chinese">阅读</div>
+                <div class="hint">点击卡片查看英文</div>
+            </div>
+            <div class="card-back">
+                <div class="english">reading</div>
+                <div class="phonetic">/ˈriːdɪŋ/</div>
+                <div class="sentence">I like reading books in the library.</div>
+                <div class="hint">点击返回中文</div>
+            </div>
+        </div>
+        <div class="flashcard" onclick="flipCard(this)">
+            <div class="card-front">
+                <div class="card-image icon-french"></div>
+                <div class="chinese">法语</div>
+                <div class="hint">点击卡片查看英文</div>
+            </div>
+            <div class="card-back">
+                <div class="english">French</div>
+                <div class="phonetic">/frentʃ/</div>
+                <div class="sentence">He is learning to speak French.</div>
+                <div class="hint">点击返回中文</div>
+            </div>
+        </div>
+        <div class="flashcard" onclick="flipCard(this)">
+            <div class="card-front">
+                <div class="card-image icon-after"></div>
+                <div class="chinese">在 ... 以后</div>
+                <div class="hint">点击卡片查看英文</div>
+            </div>
+            <div class="card-back">
+                <div class="english">after</div>
+                <div class="phonetic">/ˈɑːftə(r)/</div>
+                <div class="sentence">We can play after school.</div>
+                <div class="hint">点击返回中文</div>
+            </div>
+        </div>
+        <div class="flashcard" onclick="flipCard(this)">
+            <div class="card-front">
+                <div class="card-image icon-film"></div>
+                <div class="chinese">电影</div>
+                <div class="hint">点击卡片查看英文</div>
+            </div>
+            <div class="card-back">
+                <div class="english">film</div>
+                <div class="phonetic">/fɪlm/</div>
+                <div class="sentence">We watched a funny film yesterday.</div>
+                <div class="hint">点击返回中文</div>
+            </div>
+        </div>
+        <div class="flashcard" onclick="flipCard(this)">
+            <div class="card-front">
+                <div class="card-image icon-busy"></div>
+                <div class="chinese">忙碌的</div>
+                <div class="hint">点击卡片查看英文</div>
+            </div>
+            <div class="card-back">
+                <div class="english">busy</div>
+                <div class="phonetic">/ˈbɪzi/</div>
+                <div class="sentence">My father is very busy at work.</div>
+                <div class="hint">点击返回中文</div>
+            </div>
+        </div>
+        <div class="flashcard" onclick="flipCard(this)">
+            <div class="card-front">
+                <div class="card-image icon-building"></div>
+                <div class="chinese">建筑物, 房屋</div>
+                <div class="hint">点击卡片查看英文</div>
+            </div>
+            <div class="card-back">
+                <div class="english">building</div>
+                <div class="phonetic">/ˈbɪldɪŋ/</div>
+                <div class="sentence">That is a very tall building.</div>
+                <div class="hint">点击返回中文</div>
+            </div>
+        </div>
+        <div class="flashcard" onclick="flipCard(this)">
+            <div class="card-front">
+                <div class="card-image icon-tree"></div>
+                <div class="chinese">树</div>
+                <div class="hint">点击卡片查看英文</div>
+            </div>
+            <div class="card-back">
+                <div class="english">tree</div>
+                <div class="phonetic">/triː/</div>
+                <div class="sentence">There is a bird in the tree.</div>
+                <div class="hint">点击返回中文</div>
+            </div>
+        </div>
+        <div class="flashcard" onclick="flipCard(this)">
+            <div class="card-front">
+                <div class="card-image icon-gym"></div>
+                <div class="chinese">体育馆</div>
+                <div class="hint">点击卡片查看英文</div>
+            </div>
+            <div class="card-back">
+                <div class="english">gym</div>
+                <div class="phonetic">/dʒɪm/</div>
+                <div class="sentence">We play basketball in the gym.</div>
+                <div class="hint">点击返回中文</div>
+            </div>
+        </div>
+        </div>
+    </div>
+
+    <h2 class="unit-title">Unit 5</h2>
+    <div class="unit-section">
+        <div class="card-container">
+            <div class="flashcard" onclick="flipCard(this)">
+            <div class="card-front">
+                <div class="card-image icon-club"></div>
+                <div class="chinese">俱乐部</div>
+                <div class="hint">点击卡片查看英文</div>
+            </div>
+            <div class="card-back">
+                <div class="english">club</div>
+                <div class="phonetic">/klʌb/</div>
+                <div class="sentence">I want to join the art club.</div>
+                <div class="hint">点击返回中文</div>
+            </div>
+        </div>
+        <div class="flashcard" onclick="flipCard(this)">
+            <div class="card-front">
+                <div class="card-image icon-tennis"></div>
+                <div class="chinese">乒乓球</div>
+                <div class="hint">点击卡片查看英文</div>
+            </div>
+            <div class="card-back">
+                <div class="english">table tennis</div>
+                <div class="phonetic">/ˈteɪbl ˈtenɪs/</div>
+                <div class="sentence">Can you play table tennis?</div>
+                <div class="hint">点击返回中文</div>
+            </div>
+        </div>
+        <div class="flashcard" onclick="flipCard(this)">
+            <div class="card-front">
+                <div class="card-image icon-join"></div>
+                <div class="chinese">加入, 参加</div>
+                <div class="hint">点击卡片查看英文</div>
+            </div>
+            <div class="card-back">
+                <div class="english">join</div>
+                <div class="phonetic">/dʒɔɪn/</div>
+                <div class="sentence">Come and join our team.</div>
+                <div class="hint">点击返回中文</div>
+            </div>
+        </div>
+        <div class="flashcard" onclick="flipCard(this)">
+            <div class="card-front">
+                <div class="card-image icon-oops"></div>
+                <div class="chinese">哎哟</div>
+                <div class="hint">点击卡片查看英文</div>
+            </div>
+            <div class="card-back">
+                <div class="english">oops</div>
+                <div class="phonetic">/uːps/</div>
+                <div class="sentence">Oops, I dropped my pen!</div>
+                <div class="hint">点击返回中文</div>
+            </div>
+        </div>
+        <div class="flashcard" onclick="flipCard(this)">
+            <div class="card-front">
+                <div class="card-image icon-try"></div>
+                <div class="chinese">尝试</div>
+                <div class="hint">点击卡片查看英文</div>
+            </div>
+            <div class="card-back">
+                <div class="english">try</div>
+                <div class="phonetic">/traɪ/</div>
+                <div class="sentence">You should try to eat new foods.</div>
+                <div class="hint">点击返回中文</div>
+            </div>
+        </div>
+        <div class="flashcard" onclick="flipCard(this)">
+            <div class="card-front">
+                <div class="card-image icon-again"></div>
+                <div class="chinese">再一次, 又一次</div>
+                <div class="hint">点击卡片查看英文</div>
+            </div>
+            <div class="card-back">
+                <div class="english">again</div>
+                <div class="phonetic">/əˈɡen/</div>
+                <div class="sentence">Please say that again.</div>
+                <div class="hint">点击返回中文</div>
+            </div>
+        </div>
+        <div class="flashcard" onclick="flipCard(this)">
+            <div class="card-front">
+                <div class="card-image icon-match"></div>
+                <div class="chinese">比赛</div>
+                <div class="hint">点击卡片查看英文</div>
+            </div>
+            <div class="card-back">
+                <div class="english">match</div>
+                <div class="phonetic">/mætʃ/</div>
+                <div class="sentence">We won the football match.</div>
+                <div class="hint">点击返回中文</div>
+            </div>
+        </div>
+        <div class="flashcard" onclick="flipCard(this)">
+            <div class="card-front">
+                <div class="card-image icon-high"></div>
+                <div class="chinese">高</div>
+                <div class="hint">点击卡片查看英文</div>
+            </div>
+            <div class="card-back">
+                <div class="english">high</div>
+                <div class="phonetic">/haɪ/</div>
+                <div class="sentence">The kite flew high in the sky.</div>
+                <div class="hint">点击返回中文</div>
+            </div>
+        </div>
+        <div class="flashcard" onclick="flipCard(this)">
+            <div class="card-front">
+                <div class="card-image icon-ball"></div>
+                <div class="chinese">球</div>
+                <div class="hint">点击卡片查看英文</div>
+            </div>
+            <div class="card-back">
+                <div class="english">ball</div>
+                <div class="phonetic">/bɔːl/</div>
+                <div class="sentence">Kick the ball to me.</div>
+                <div class="hint">点击返回中文</div>
+            </div>
+        </div>
+        <div class="flashcard" onclick="flipCard(this)">
+            <div class="card-front">
+                <div class="card-image icon-basket"></div>
+                <div class="chinese">篮; 得分</div>
+                <div class="hint">点击卡片查看英文</div>
+            </div>
+            <div class="card-back">
+                <div class="english">basket</div>
+                <div class="phonetic">/ˈbɑːskɪt/</div>
+                <div class="sentence">He threw the ball into the basket.</div>
+                <div class="hint">点击返回中文</div>
+            </div>
+        </div>
+        <div class="flashcard" onclick="flipCard(this)">
+            <div class="card-front">
+                <div class="card-image icon-get"></div>
+                <div class="chinese">得到</div>
+                <div class="hint">点击卡片查看英文</div>
+            </div>
+            <div class="card-back">
+                <div class="english">get</div>
+                <div class="phonetic">/ɡet/</div>
+                <div class="sentence">Did you get my letter?</div>
+                <div class="hint">点击返回中文</div>
+            </div>
+        </div>
+        <div class="flashcard" onclick="flipCard(this)">
+            <div class="card-front">
+                <div class="card-image icon-shoot"></div>
+                <div class="chinese">投(篮), 射(门)</div>
+                <div class="hint">点击卡片查看英文</div>
+            </div>
+            <div class="card-back">
+                <div class="english">shoot</div>
+                <div class="phonetic">/ʃuːt/</div>
+                <div class="sentence">He is going to shoot the ball.</div>
+                <div class="hint">点击返回中文</div>
+            </div>
+        </div>
+        <div class="flashcard" onclick="flipCard(this)">
+            <div class="card-front">
+                <div class="card-image icon-win"></div>
+                <div class="chinese">获胜, 赢</div>
+                <div class="hint">点击卡片查看英文</div>
+            </div>
+            <div class="card-back">
+                <div class="english">win</div>
+                <div class="phonetic">/wɪn/</div>
+                <div class="sentence">I hope we win the game.</div>
+                <div class="hint">点击返回中文</div>
+            </div>
+        </div>
+        <div class="flashcard" onclick="flipCard(this)">
+            <div class="card-front">
+                <div class="card-image icon-their"></div>
+                <div class="chinese">他们的, 她们的</div>
+                <div class="hint">点击卡片查看英文</div>
+            </div>
+            <div class="card-back">
+                <div class="english">their</div>
+                <div class="phonetic">/ðeə(r)/</div>
+                <div class="sentence">This is their classroom.</div>
+                <div class="hint">点击返回中文</div>
+            </div>
+        </div>
+        <div class="flashcard" onclick="flipCard(this)">
+            <div class="card-front">
+                <div class="card-image icon-easy"></div>
+                <div class="chinese">容易的</div>
+                <div class="hint">点击卡片查看英文</div>
+            </div>
+            <div class="card-back">
+                <div class="english">easy</div>
+                <div class="phonetic">/ˈiːzi/</div>
+                <div class="sentence">The English test was very easy.</div>
+                <div class="hint">点击返回中文</div>
+            </div>
+        </div>
+        <div class="flashcard" onclick="flipCard(this)">
+            <div class="card-front">
+                <div class="card-image icon-last"></div>
+                <div class="chinese">最后的</div>
+                <div class="hint">点击卡片查看英文</div>
+            </div>
+            <div class="card-back">
+                <div class="english">last</div>
+                <div class="phonetic">/lɑːst/</div>
+                <div class="sentence">This is the last day of school.</div>
+                <div class="hint">点击返回中文</div>
+            </div>
+        </div>
+        <div class="flashcard" onclick="flipCard(this)">
+            <div class="card-front">
+                <div class="card-image icon-pass"></div>
+                <div class="chinese">传递, 传送</div>
+                <div class="hint">点击卡片查看英文</div>
+            </div>
+            <div class="card-back">
+                <div class="english">pass</div>
+                <div class="phonetic">/pɑːs/</div>
+                <div class="sentence">Please pass me the salt.</div>
+                <div class="hint">点击返回中文</div>
+            </div>
+        </div>
+        <div class="flashcard" onclick="flipCard(this)">
+            <div class="card-front">
+                <div class="card-image icon-got"></div>
+                <div class="chinese">got (get 的过去式)</div>
+                <div class="hint">点击卡片查看英文</div>
+            </div>
+            <div class="card-back">
+                <div class="english">got</div>
+                <div class="phonetic">/ɡɒt/</div>
+                <div class="sentence">I got a new bike for my birthday.</div>
+                <div class="hint">点击返回中文</div>
+            </div>
+        </div>
+        <div class="flashcard" onclick="flipCard(this)">
+            <div class="card-front">
+                <div class="card-image icon-shot"></div>
+                <div class="chinese">shot (shoot 的过去式)</div>
+                <div class="hint">点击卡片查看英文</div>
+            </div>
+            <div class="card-back">
+                <div class="english">shot</div>
+                <div class="phonetic">/ʃɒt/</div>
+                <div class="sentence">He shot the ball and scored.</div>
+                <div class="hint">点击返回中文</div>
+            </div>
+        </div>
+        <div class="flashcard" onclick="flipCard(this)">
+            <div class="card-front">
+                <div class="card-image icon-goal"></div>
+                <div class="chinese">得分</div>
+                <div class="hint">点击卡片查看英文</div>
+            </div>
+            <div class="card-back">
+                <div class="english">goal</div>
+                <div class="phonetic">/ɡəʊl/</div>
+                <div class="sentence">He scored a goal in the soccer game.</div>
+                <div class="hint">点击返回中文</div>
+            </div>
+        </div>
+        <div class="flashcard" onclick="flipCard(this)">
+            <div class="card-front">
+                <div class="card-image icon-won"></div>
+                <div class="chinese">won (win 的过去式)</div>
+                <div class="hint">点击卡片查看英文</div>
+            </div>
+            <div class="card-back">
+                <div class="english">won</div>
+                <div class="phonetic">/wʌn/</div>
+                <div class="sentence">Our team won the match yesterday.</div>
+                <div class="hint">点击返回中文</div>
+            </div>
+        </div>
+        <div class="flashcard" onclick="flipCard(this)">
+            <div class="card-front">
+                <div class="card-image icon-animal"></div>
+                <div class="chinese">动物</div>
+                <div class="hint">点击卡片查看英文</div>
+            </div>
+            <div class="card-back">
+                <div class="english">animal</div>
+                <div class="phonetic">/ˈænɪml/</div>
+                <div class="sentence">The panda is my favorite animal.</div>
+                <div class="hint">点击返回中文</div>
+            </div>
+        </div>
+        </div>
+    </div>
+
+    <h2 class="unit-title">Unit 6</h2>
+    <div class="unit-section">
+        <div class="card-container">
+            <div class="flashcard" onclick="flipCard(this)">
+            <div class="card-front">
+                <div class="card-image icon-spring"></div>
+                <div class="chinese">春节</div>
+                <div class="hint">点击卡片查看英文</div>
+            </div>
+            <div class="card-back">
+                <div class="english">the Spring Festival</div>
+                <div class="phonetic">/ðə sprɪŋ ˈfestɪvl/</div>
+                <div class="sentence">We eat dumplings during the Spring Festival.</div>
+                <div class="hint">点击返回中文</div>
+            </div>
+        </div>
+        <div class="flashcard" onclick="flipCard(this)">
+            <div class="card-front">
+                <div class="card-image icon-february"></div>
+                <div class="chinese">二月</div>
+                <div class="hint">点击卡片查看英文</div>
+            </div>
+            <div class="card-back">
+                <div class="english">February</div>
+                <div class="phonetic">/ˈfebruəri/</div>
+                <div class="sentence">February is often a cold month.</div>
+                <div class="hint">点击返回中文</div>
+            </div>
+        </div>
+        <div class="flashcard" onclick="flipCard(this)">
+            <div class="card-front">
+                <div class="card-image icon-january"></div>
+                <div class="chinese">一月</div>
+                <div class="hint">点击卡片查看英文</div>
+            </div>
+            <div class="card-back">
+                <div class="english">January</div>
+                <div class="phonetic">/ˈdʒænjuəri/</div>
+                <div class="sentence">New Year's Day is in January.</div>
+                <div class="hint">点击返回中文</div>
+            </div>
+        </div>
+        <div class="flashcard" onclick="flipCard(this)">
+            <div class="card-front">
+                <div class="card-image icon-before"></div>
+                <div class="chinese">在 ... 以前</div>
+                <div class="hint">点击卡片查看英文</div>
+            </div>
+            <div class="card-back">
+                <div class="english">before</div>
+                <div class="phonetic">/bɪˈfɔː(r)/</div>
+                <div class="sentence">Wash your hands before dinner.</div>
+                <div class="hint">点击返回中文</div>
+            </div>
+        </div>
+        <div class="flashcard" onclick="flipCard(this)">
+            <div class="card-front">
+                <div class="card-image icon-relative"></div>
+                <div class="chinese">亲戚, 亲属</div>
+                <div class="hint">点击卡片查看英文</div>
+            </div>
+            <div class="card-back">
+                <div class="english">relative</div>
+                <div class="phonetic">/ˈrelətɪv/</div>
+                <div class="sentence">My aunt is a close relative.</div>
+                <div class="hint">点击返回中文</div>
+            </div>
+        </div>
+        <div class="flashcard" onclick="flipCard(this)">
+            <div class="card-front">
+                <div class="card-image icon-came"></div>
+                <div class="chinese">came (come 的过去式)</div>
+                <div class="hint">点击卡片查看英文</div>
+            </div>
+            <div class="card-back">
+                <div class="english">came</div>
+                <div class="phonetic">/keɪm/</div>
+                <div class="sentence">My friend came to my house yesterday.</div>
+                <div class="hint">点击返回中文</div>
+            </div>
+        </div>
+        <div class="flashcard" onclick="flipCard(this)">
+            <div class="card-front">
+                <div class="card-image icon-firework2"></div>
+                <div class="chinese">使 ... 爆炸 (燃放)</div>
+                <div class="hint">点击卡片查看英文</div>
+            </div>
+            <div class="card-back">
+                <div class="english">set off</div>
+                <div class="phonetic">/set ɒf/</div>
+                <div class="sentence">We set off fireworks at night.</div>
+                <div class="hint">点击返回中文</div>
+            </div>
+        </div>
+        <div class="flashcard" onclick="flipCard(this)">
+            <div class="card-front">
+                <div class="card-image icon-firework"></div>
+                <div class="chinese">烟火, 烟花</div>
+                <div class="hint">点击卡片查看英文</div>
+            </div>
+            <div class="card-back">
+                <div class="english">firework</div>
+                <div class="phonetic">/ˈfaɪəwɜːk/</div>
+                <div class="sentence">The firework made the sky bright.</div>
+                <div class="hint">点击返回中文</div>
+            </div>
+        </div>
+        <div class="flashcard" onclick="flipCard(this)">
+            <div class="card-front">
+                <div class="card-image icon-house"></div>
+                <div class="chinese">房子, 房屋</div>
+                <div class="hint">点击卡片查看英文</div>
+            </div>
+            <div class="card-back">
+                <div class="english">house</div>
+                <div class="phonetic">/haʊs/</div>
+                <div class="sentence">My house has a red roof.</div>
+                <div class="hint">点击返回中文</div>
+            </div>
+        </div>
+        <div class="flashcard" onclick="flipCard(this)">
+            <div class="card-front">
+                <div class="card-image icon-wonderful"></div>
+                <div class="chinese">美妙的, 精彩的</div>
+                <div class="hint">点击卡片查看英文</div>
+            </div>
+            <div class="card-back">
+                <div class="english">wonderful</div>
+                <div class="phonetic">/ˈwʌndəfl/</div>
+                <div class="sentence">We had a wonderful time at the party.</div>
+                <div class="hint">点击返回中文</div>
+            </div>
+        </div>
+        <div class="flashcard" onclick="flipCard(this)">
+            <div class="card-front">
+                <div class="card-image icon-fun"></div>
+                <div class="chinese">有趣的; 乐趣</div>
+                <div class="hint">点击卡片查看英文</div>
+            </div>
+            <div class="card-back">
+                <div class="english">fun</div>
+                <div class="phonetic">/fʌn/</div>
+                <div class="sentence">Playing games is a lot of fun.</div>
+                <div class="hint">点击返回中文</div>
+            </div>
+        </div>
+        <div class="flashcard" onclick="flipCard(this)">
+            <div class="card-front">
+                <div class="card-image icon-country"></div>
+                <div class="chinese">乡村</div>
+                <div class="hint">点击卡片查看英文</div>
+            </div>
+            <div class="card-back">
+                <div class="english">country</div>
+                <div class="phonetic">/ˈkʌntri/</div>
+                <div class="sentence">My grandparents live in the country.</div>
+                <div class="hint">点击返回中文</div>
+            </div>
+        </div>
+        <div class="flashcard" onclick="flipCard(this)">
+            <div class="card-front">
+                <div class="card-image icon-ask"></div>
+                <div class="chinese">问</div>
+                <div class="hint">点击卡片查看英文</div>
+            </div>
+            <div class="card-back">
+                <div class="english">ask</div>
+                <div class="phonetic">/ɑːsk/</div>
+                <div class="sentence">May I ask you a question?</div>
+                <div class="hint">点击返回中文</div>
+            </div>
+        </div>
+        <div class="flashcard" onclick="flipCard(this)">
+            <div class="card-front">
+                <div class="card-image icon-money"></div>
+                <div class="chinese">压岁钱</div>
+                <div class="hint">点击卡片查看英文</div>
+            </div>
+            <div class="card-back">
+                <div class="english">lucky money</div>
+                <div class="phonetic">/ˈlʌki ˈmʌni/</div>
+                <div class="sentence">Grandma gave me lucky money in a red envelope.</div>
+                <div class="hint">点击返回中文</div>
+            </div>
+        </div>
+        <div class="flashcard" onclick="flipCard(this)">
+            <div class="card-front">
+                <div class="card-image icon-eve"></div>
+                <div class="chinese">前夜</div>
+                <div class="hint">点击卡片查看英文</div>
+            </div>
+            <div class="card-back">
+                <div class="english">eve</div>
+                <div class="phonetic">/iːv/</div>
+                <div class="sentence">We had a big dinner on New Year's Eve.</div>
+                <div class="hint">点击返回中文</div>
+            </div>
+        </div>
+        <div class="flashcard" onclick="flipCard(this)">
+            <div class="card-front">
+                <div class="card-image icon-early"></div>
+                <div class="chinese">时间早</div>
+                <div class="hint">点击卡片查看英文</div>
+            </div>
+            <div class="card-back">
+                <div class="english">early</div>
+                <div class="phonetic">/ˈɜːrli/</div>
+                <div class="sentence">I wake up early in the morning.</div>
+                <div class="hint">点击返回中文</div>
+            </div>
+        </div>
+        <div class="flashcard" onclick="flipCard(this)">
+            <div class="card-front">
+                <div class="card-image icon-next"></div>
+                <div class="chinese">紧接着的, 下次的</div>
+                <div class="hint">点击卡片查看英文</div>
+            </div>
+            <div class="card-back">
+                <div class="english">next</div>
+                <div class="phonetic">/nekst/</div>
+                <div class="sentence">I will see you next week.</div>
+                <div class="hint">点击返回中文</div>
+            </div>
+        </div>
+        </div>
+    </div>
+
+    <script>
+        function flipCard(card) {
+            card.classList.toggle('flipped');
+            updateStats();
+            
+            // 如果卡片翻转到背面且TTS开启，朗读英文单词
+            if (card.classList.contains('flipped') && ttsEnabled) {
+                const englishWord = card.querySelector('.english').textContent;
+                speakText(englishWord);
+            }
+        }
+        
+        function flipAllCards() {
+            const cards = document.querySelectorAll('.flashcard');
+            cards.forEach(card => {
+                card.classList.add('flipped');
+            });
+            updateStats();
+        }
+        
+        function resetAllCards() {
+            const cards = document.querySelectorAll('.flashcard');
+            cards.forEach(card => {
+                card.classList.remove('flipped');
+            });
+            updateStats();
+        }
+        
+        let ttsEnabled = false;
+        
+        function toggleTTS() {
+            ttsEnabled = !ttsEnabled;
+            const ttsButton = document.getElementById('ttsToggle');
+            
+            if (ttsEnabled) {
+                ttsButton.textContent = '🔊 TTS开启';
+                ttsButton.classList.remove('tertiary');
+                ttsButton.classList.add('secondary');
+            } else {
+                ttsButton.textContent = '🔇 TTS关闭';
+                ttsButton.classList.remove('secondary');
+                ttsButton.classList.add('tertiary');
+            }
+        }
+        
+        function speakText(text) {
+            if (!ttsEnabled) return;
+            
+            if ('speechSynthesis' in window) {
+                // 停止当前正在播放的语音
+                window.speechSynthesis.cancel();
+                
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.lang = 'en-US';
+                utterance.rate = 0.8; // 稍微放慢语速
+                utterance.pitch = 1.0;
+                utterance.volume = 1.0;
+                
+                // 设置语音合成器
+                const voices = window.speechSynthesis.getVoices();
+                const englishVoice = voices.find(voice => 
+                    voice.lang.includes('en') && voice.name.includes('Female')
+                ) || voices.find(voice => voice.lang.includes('en'));
+                
+                if (englishVoice) {
+                    utterance.voice = englishVoice;
+                }
+                
+                window.speechSynthesis.speak(utterance);
+            }
+        }
+        
+        function shuffleCards() {
+            const containers = document.querySelectorAll('.card-container');
+            
+            containers.forEach(container => {
+                const cards = Array.from(container.querySelectorAll('.flashcard'));
+                
+                // 随机排序卡片数组
+                for (let i = cards.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [cards[i], cards[j]] = [cards[j], cards[i]];
+                }
+                
+                // 清空容器并重新添加随机排序的卡片
+                container.innerHTML = '';
+                cards.forEach(card => {
+                    container.appendChild(card);
+                });
+            });
+            
+            // 重置所有卡片状态
+            resetAllCards();
+        }
+        
+        function updateStats() {
+            const totalCards = document.querySelectorAll('.flashcard').length;
+            const flippedCards = document.querySelectorAll('.flashcard.flipped').length;
+            
+            document.getElementById('totalCards').textContent = totalCards;
+            document.getElementById('flippedCount').textContent = `已翻转: ${flippedCards}`;
+            
+            // 更新进度条
+            const progress = document.getElementById('progress');
+            const percentage = (flippedCards / totalCards) * 100;
+            progress.style.width = percentage + '%';
+        }
+        
+        // 页面加载时初始化统计信息和语音合成器
+        document.addEventListener('DOMContentLoaded', function() {
+            updateStats();
+            
+            // 初始化语音合成器
+            if ('speechSynthesis' in window) {
+                // 加载语音列表
+                window.speechSynthesis.getVoices();
+                
+                // 有些浏览器需要等待语音列表加载完成
+                window.speechSynthesis.onvoiceschanged = function() {
+                    console.log('语音列表加载完成');
+                };
+            } else {
+                console.warn('当前浏览器不支持语音合成功能');
+            }
+        });
+    </script>
+
+</body>
+
+</html>
